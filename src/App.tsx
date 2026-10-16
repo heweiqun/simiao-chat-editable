@@ -597,6 +597,31 @@ export default function App() {
                             }))
                           }
                         />
+                        <button
+                          type="button"
+                          className="text-button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setDraft((d) => ({
+                              ...d,
+                              settings: {
+                                ...d.settings,
+                                bubbleColors: {
+                                  ...d.settings.bubbleColors,
+                                  [d.settings.theme]: {
+                                    ...getBubbleColors(d.settings),
+                                    [side]: getBubbleColors({
+                                      ...d.settings,
+                                      bubbleColors: undefined,
+                                    })[side],
+                                  },
+                                },
+                              },
+                            }));
+                          }}
+                        >
+                          重置
+                        </button>
                       </label>
                     ))}
                   </div>

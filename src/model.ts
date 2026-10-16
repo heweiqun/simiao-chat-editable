@@ -1,3 +1,4 @@
+import defaultAvatar from '../assets/media/role1.5a2a8193.jpeg';
 export interface Role {
   id: string;
   name: string;
@@ -60,7 +61,7 @@ export const defaultDraft: Draft = {
     {
       id: 'friend',
       name: '喵喵',
-      avatar: `${import.meta.env.BASE_URL}media/role1.5a2a8193.jpeg`,
+      avatar: defaultAvatar,
       self: false,
     },
     { id: 'me', name: '自己', avatar: '', self: true },
