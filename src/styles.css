@@ -1315,3 +1315,10 @@ footer {
   background: #1c7355;
   border-color: #1c7355;
 }
+
+.online-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}

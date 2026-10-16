@@ -29,6 +29,7 @@ import {
 } from './model';
 import type { Message } from './model';
 export default function App() {
+  const isOffline = location.protocol === 'file:';
   const [draft, setDraft] = useState(loadDraft);
   const [previewZoom, setPreviewZoom] = useState<number | null>(null);
   const [previewBounds, setPreviewBounds] = useState({
@@ -300,14 +301,25 @@ export default function App() {
           对话生成器
         </a>
         <div className="topbar-actions">
-          <button
-            className="secondary offline-download"
-            onClick={downloadOffline}
-            disabled={downloadingOffline}
-          >
-            <Download size={15} />
-            {downloadingOffline ? '正在下载…' : '下载离线版'}
-          </button>
+          {isOffline ? (
+            <a
+              className="secondary offline-download online-link"
+              href="https://heweiqun.github.io/simiao-chat-editable/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              打开在线版
+            </a>
+          ) : (
+            <button
+              className="secondary offline-download"
+              onClick={downloadOffline}
+              disabled={downloadingOffline}
+            >
+              <Download size={15} />
+              {downloadingOffline ? '正在下载…' : '下载离线版'}
+            </button>
+          )}
           <div className="version">
             可编辑版 <span>V1.0</span>
           </div>
