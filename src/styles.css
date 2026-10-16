@@ -1245,3 +1245,51 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+.financial-received {
+  margin-bottom: 14px;
+}
+.bubble.financial-bubble {
+  padding: 0;
+  background: #fa9d3b;
+  color: #fff;
+  width: 232px;
+  max-width: 100%;
+  border-radius: 6px;
+}
+.bubble.financial-bubble.received {
+  background: #f8c994;
+}
+.financial-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  min-height: 64px;
+}
+.financial-main > img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.financial-main > div {
+  min-width: 0;
+}
+.financial-main strong {
+  font-size: 15px;
+  font-weight: 400;
+  display: block;
+  overflow-wrap: anywhere;
+}
+.financial-main small {
+  font-size: 11px;
+  display: block;
+  line-height: 1.5;
+}
+.financial-footer {
+  border-top: 1px solid #ffffff40;
+  padding: 3px 12px;
+  font-size: 10px;
+  line-height: 1.6;
+}

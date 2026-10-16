@@ -62,6 +62,11 @@ export default function App() {
   const [text, setText] = useState('');
   const [image, setImage] = useState('');
   const [type, setType] = useState<Message['type']>('text');
+  const [amount, setAmount] = useState('88.88');
+  const [remark, setRemark] = useState('');
+  const [transferFooter, setTransferFooter] = useState('微信转账');
+  const [redpacketFooter, setRedpacketFooter] = useState('微信红包');
+  const [received, setReceived] = useState(false);
   const [duration, setDuration] = useState('2');
   const [messageTime, setMessageTime] = useState(currentMessageTime);
   const [editing, setEditing] = useState<string | null>(null);
@@ -120,22 +125,39 @@ export default function App() {
     }
   };
   const content =
-    type === 'text'
-      ? text.trim()
-      : type === 'image'
-        ? image
-        : type === 'voice'
-          ? Number.isInteger(Number(duration)) &&
-            Number(duration) >= 1 &&
-            Number(duration) <= 60
-            ? duration
-            : ''
-          : /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(messageTime)
-            ? messageTime
-            : '';
+    type === 'transfer' || type === 'redpacket'
+      ? /^\d{1,8}(\.\d{1,2})?$/.test(amount) && Number(amount) > 0
+        ? remark.trim() ||
+          (type === 'transfer' ? '转账给你' : '恭喜发财，大吉大利')
+        : ''
+      : type === 'text'
+        ? text.trim()
+        : type === 'image'
+          ? image
+          : type === 'voice'
+            ? Number.isInteger(Number(duration)) &&
+              Number(duration) >= 1 &&
+              Number(duration) <= 60
+              ? duration
+              : ''
+            : /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(messageTime)
+              ? messageTime
+              : '';
   const submit = () => {
     if (!content) return;
-    const message: Message = { id: editing || uid(), roleId, type, content };
+    const message: Message = {
+      id: editing || uid(),
+      roleId,
+      type,
+      content,
+      ...(type === 'transfer' || type === 'redpacket'
+        ? {
+            amount: Number(amount).toFixed(2),
+            received,
+            footer: type === 'transfer' ? transferFooter : redpacketFooter,
+          }
+        : {}),
+    };
     setDraft((d) => ({
       ...d,
       messages: editing
@@ -156,6 +178,7 @@ export default function App() {
     if (!preview.current) return;
     setExporting(true);
     setNotice('');
+    let exportHost: HTMLDivElement | undefined;
     try {
       await document.fonts.ready;
       if (draft.settings.backgroundImage) {
@@ -168,7 +191,35 @@ export default function App() {
           img.decode(),
         ),
       );
-      const blob = await toBlob(preview.current, {
+      // HTML-to-image does not preserve scrollTop when it clones the DOM.
+      // Flatten the visible scroll offset into a transform on an export-only copy.
+      const exportCopy = preview.current.cloneNode(true) as HTMLDivElement;
+      // Keep off-screen positioning on a parent that is NOT captured.
+      exportHost = document.createElement('div');
+      exportHost.style.cssText =
+        'position:fixed;left:-100000px;top:0;pointer-events:none;';
+      exportHost.setAttribute('aria-hidden', 'true');
+      exportHost.appendChild(exportCopy);
+      const sourceMessages =
+        preview.current.querySelector<HTMLElement>('.chat-messages');
+      const copiedMessages =
+        exportCopy.querySelector<HTMLElement>('.chat-messages');
+      if (sourceMessages && copiedMessages) {
+        const content = document.createElement('div');
+        content.style.display = 'flow-root';
+        content.style.transform = `translateY(-${sourceMessages.scrollTop}px)`;
+        while (copiedMessages.firstChild)
+          content.appendChild(copiedMessages.firstChild);
+        copiedMessages.appendChild(content);
+        copiedMessages.style.overflow = 'hidden';
+      }
+      document.body.appendChild(exportHost);
+      await Promise.all(
+        Array.from(exportCopy.querySelectorAll('img')).map((img) =>
+          img.decode(),
+        ),
+      );
+      const blob = await toBlob(exportCopy, {
         pixelRatio: 3,
         filter: (node) =>
           !(
@@ -189,6 +240,7 @@ export default function App() {
     } catch (e) {
       setNotice(`导出失败：${(e as Error).message}`);
     } finally {
+      exportHost?.remove();
       setExporting(false);
     }
   };
@@ -359,8 +411,68 @@ export default function App() {
                     >
                       时间消息
                     </button>
+                    {(['transfer', 'redpacket'] as const).map((kind) => (
+                      <button
+                        key={kind}
+                        className={type === kind ? 'selected' : ''}
+                        onClick={() => setType(kind)}
+                      >
+                        {kind === 'transfer' ? '转账消息' : '红包消息'}
+                      </button>
+                    ))}
                   </div>
-                  {type === 'voice' ? (
+                  {type === 'transfer' || type === 'redpacket' ? (
+                    <>
+                      <label className="field">
+                        {type === 'transfer' ? '转账' : '红包'}金额
+                        <input
+                          type="number"
+                          min="0.01"
+                          max="99999999.99"
+                          step="0.01"
+                          value={amount}
+                          onChange={(e) => setAmount(e.target.value)}
+                        />
+                      </label>
+                      <label className="field">
+                        {type === 'transfer' ? '转账' : '红包'}备注
+                        <input
+                          value={remark}
+                          maxLength={100}
+                          placeholder={
+                            type === 'transfer'
+                              ? '转账给你'
+                              : '恭喜发财，大吉大利'
+                          }
+                          onChange={(e) => setRemark(e.target.value)}
+                        />
+                      </label>
+                      <label className="field">
+                        底部文字
+                        <input
+                          value={
+                            type === 'transfer'
+                              ? transferFooter
+                              : redpacketFooter
+                          }
+                          maxLength={40}
+                          onChange={(e) =>
+                            type === 'transfer'
+                              ? setTransferFooter(e.target.value)
+                              : setRedpacketFooter(e.target.value)
+                          }
+                        />
+                      </label>
+                      <label className="checkbox financial-received">
+                        <input
+                          type="checkbox"
+                          checked={received}
+                          onChange={(e) => setReceived(e.target.checked)}
+                        />
+                        已接收
+                      </label>
+                    </>
+                  ) : type === 'voice' ? (
                     <label className="field">
                       语音时长（秒）
                       <input
@@ -520,6 +632,17 @@ export default function App() {
                               setEditing(m.id);
                               setRoleId(m.roleId);
                               setType(m.type);
+                              if (
+                                m.type === 'transfer' ||
+                                m.type === 'redpacket'
+                              ) {
+                                setAmount(m.amount || '88.88');
+                                setRemark(m.content);
+                                setReceived(m.received === true);
+                                if (m.type === 'transfer')
+                                  setTransferFooter(m.footer ?? '微信转账');
+                                else setRedpacketFooter(m.footer ?? '微信红包');
+                              }
                               if (m.type === 'voice') setDuration(m.content);
                               if (m.type === 'time') setMessageTime(m.content);
                               setText(m.type === 'text' ? m.content : '');

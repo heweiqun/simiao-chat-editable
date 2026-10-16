@@ -146,9 +146,39 @@ const ChatPreview = forwardRef<
               <div className="message-body">
                 {deleteButton(m.id)}
                 <div
-                  className={`bubble ${m.type === 'image' ? 'image-bubble' : m.type === 'voice' ? 'voice-bubble' : ''}`}
+                  className={`bubble ${m.type === 'image' ? 'image-bubble' : m.type === 'voice' ? 'voice-bubble' : m.type === 'transfer' || m.type === 'redpacket' ? `financial-bubble ${m.received ? 'received' : ''}` : ''}`}
                 >
-                  {m.type === 'text' ? (
+                  {m.type === 'transfer' || m.type === 'redpacket' ? (
+                    <div className="financial-card">
+                      <div className="financial-main">
+                        <img
+                          src={
+                            iconAssets[
+                              `../assets/icon/trans-icon${m.type === 'transfer' ? (m.received ? 2 : 1) : m.received ? 4 : 3}.png`
+                            ]
+                          }
+                          alt={m.type === 'transfer' ? '转账' : '红包'}
+                        />
+                        <div>
+                          {m.type === 'transfer' ? (
+                            <>
+                              <strong>¥{m.amount || '0.00'}</strong>
+                              <small>{m.received ? '已收款' : m.content}</small>
+                            </>
+                          ) : (
+                            <>
+                              <strong>{m.content}</strong>
+                              {m.received && <small>已领取</small>}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="financial-footer">
+                        {m.footer ??
+                          (m.type === 'transfer' ? '微信转账' : '微信红包')}
+                      </div>
+                    </div>
+                  ) : m.type === 'text' ? (
                     <EmojiText text={m.content} />
                   ) : m.type === 'voice' ? (
                     <span

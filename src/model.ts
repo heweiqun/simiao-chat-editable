@@ -8,7 +8,10 @@ export interface Role {
 export interface Message {
   id: string;
   roleId: string;
-  type: 'text' | 'image' | 'voice' | 'time';
+  type: 'text' | 'image' | 'voice' | 'time' | 'transfer' | 'redpacket';
+  amount?: string;
+  received?: boolean;
+  footer?: string;
   content: string;
 }
 export const phoneModels = [
@@ -106,7 +109,9 @@ export function loadDraft(): Draft {
       d.messages.every(
         (m: Message) =>
           typeof m.id === 'string' &&
-          ['text', 'image', 'voice', 'time'].includes(m.type) &&
+          ['text', 'image', 'voice', 'time', 'transfer', 'redpacket'].includes(
+            m.type,
+          ) &&
           typeof m.content === 'string' &&
           d.roles.some((r: Role) => r.id === m.roleId),
       ) &&
@@ -121,6 +126,12 @@ export function loadDraft(): Draft {
     )
       return {
         ...d,
+        roles: d.roles.map((role: Role) => ({
+          ...role,
+          avatar: /^(?:\.\/|\/)?media\/role1\.5a2a8193\.jpeg$/.test(role.avatar)
+            ? defaultAvatar
+            : role.avatar,
+        })),
         settings: {
           ...d.settings,
           theme: d.settings.theme === 'dark' ? 'dark' : 'light',
