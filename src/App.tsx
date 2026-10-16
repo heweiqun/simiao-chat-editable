@@ -264,7 +264,11 @@ export default function App() {
       if (!response.ok)
         throw new Error('离线文件不存在，请先执行 npm run build');
       const html = await response.text();
-      if (!html.includes('<html') || html.includes('/@vite/client'))
+      const documentCopy = new DOMParser().parseFromString(html, 'text/html');
+      if (
+        !documentCopy.querySelector('#root') ||
+        documentCopy.querySelector('script[src], link[rel="stylesheet"]')
+      )
         throw new Error('请先构建单文件离线版');
       const url = URL.createObjectURL(
         new Blob([html], { type: 'text/html;charset=utf-8' }),
