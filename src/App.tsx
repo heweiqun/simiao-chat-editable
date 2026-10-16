@@ -244,6 +244,41 @@ export default function App() {
       setExporting(false);
     }
   };
+  const [downloadingOffline, setDownloadingOffline] = useState(false);
+  const downloadOffline = async () => {
+    const link = document.createElement('a');
+    link.download = '四喵对话生成器-离线版.html';
+    if (location.protocol === 'file:') {
+      link.href = location.href;
+      link.click();
+      return;
+    }
+    setDownloadingOffline(true);
+    try {
+      const response = await fetch(
+        import.meta.env.DEV
+          ? '/__offline-download'
+          : new URL('./index.html', location.href),
+        { cache: 'no-store' },
+      );
+      if (!response.ok)
+        throw new Error('离线文件不存在，请先执行 npm run build');
+      const html = await response.text();
+      if (!html.includes('<html') || html.includes('/@vite/client'))
+        throw new Error('请先构建单文件离线版');
+      const url = URL.createObjectURL(
+        new Blob([html], { type: 'text/html;charset=utf-8' }),
+      );
+      link.href = url;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      setNotice('离线版已下载，可直接用浏览器打开');
+    } catch (error) {
+      setNotice(`下载失败：${(error as Error).message}`);
+    } finally {
+      setDownloadingOffline(false);
+    }
+  };
   const tabs = [
     { id: 'messages', label: '对话', icon: MessageSquare },
     { id: 'roles', label: '角色', icon: Users },
@@ -260,8 +295,18 @@ export default function App() {
           <span className="brand-divider" />
           对话生成器
         </a>
-        <div className="version">
-          可编辑版 <span>V1.0</span>
+        <div className="topbar-actions">
+          <button
+            className="secondary offline-download"
+            onClick={downloadOffline}
+            disabled={downloadingOffline}
+          >
+            <Download size={15} />
+            {downloadingOffline ? '正在下载…' : '下载离线版'}
+          </button>
+          <div className="version">
+            可编辑版 <span>V1.0</span>
+          </div>
         </div>
       </header>
       <main className="workspace">

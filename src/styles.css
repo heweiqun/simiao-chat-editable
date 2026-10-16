@@ -1258,7 +1258,7 @@ footer {
   border-radius: 6px;
 }
 .bubble.financial-bubble.received {
-  background: #f8c994;
+  background: #fdce9d;
 }
 .financial-main {
   display: flex;
@@ -1292,4 +1292,26 @@ footer {
   padding: 3px 12px;
   font-size: 10px;
   line-height: 1.6;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.offline-download {
+  padding: 7px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.offline-download {
+  background: #258766;
+  border-color: #258766;
+  color: #fff;
+  font-weight: 500;
+}
+.offline-download:hover {
+  background: #1c7355;
+  border-color: #1c7355;
 }
