@@ -5,6 +5,7 @@ import {
   Cat,
   Users,
   MessageSquare,
+  Type,
   SlidersHorizontal,
   Download,
   Plus,
@@ -24,6 +25,8 @@ import {
   uid,
   STORAGE_KEY,
   getBubbleColors,
+  bubbleTypography,
+  getBubbleTypography,
   currentMessageTime,
   formatMessageTime,
 } from './model';
@@ -287,8 +290,10 @@ export default function App() {
   const tabs = [
     { id: 'messages', label: '对话', icon: MessageSquare },
     { id: 'roles', label: '角色', icon: Users },
+    { id: 'bubbles', label: '聊天气泡', icon: Type },
     { id: 'settings', label: '显示设置', icon: SlidersHorizontal },
   ];
+  const typography = getBubbleTypography(draft.settings);
   return (
     <>
       <header className="topbar">
@@ -730,6 +735,62 @@ export default function App() {
                       </div>
                     ))}
                   </div>
+                </>
+              )}
+              {tab === 'bubbles' && (
+                <>
+                  <div className="section-title">
+                    <h2>聊天气泡设置</h2>
+                    <Type size={18} />
+                  </div>
+                  {(
+                    [
+                      'bubbleFontSize',
+                      'bubbleVerticalPadding',
+                      'bubbleTextLineSpacing',
+                    ] as const
+                  ).map((key) => {
+                    const { label, min, max, step } = bubbleTypography[key];
+                    const unit = key === 'bubbleTextLineSpacing' ? '倍' : 'px';
+                    return (
+                      <label className="field" key={key}>
+                        {label} · {typography[key]} {unit}
+                        <input
+                          type="range"
+                          aria-label={label}
+                          aria-valuetext={`${typography[key]} ${unit}`}
+                          min={min}
+                          max={max}
+                          step={step}
+                          value={typography[key]}
+                          onChange={(e) => {
+                            const value = e.currentTarget.valueAsNumber;
+                            setDraft((d) => ({
+                              ...d,
+                              settings: { ...d.settings, [key]: value },
+                            }));
+                          }}
+                        />
+                      </label>
+                    );
+                  })}
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={() =>
+                      setDraft((d) => ({
+                        ...d,
+                        settings: {
+                          ...d.settings,
+                          bubbleFontSize: undefined,
+                          bubbleVerticalPadding: undefined,
+                          bubbleTextLineSpacing: undefined,
+                        },
+                      }))
+                    }
+                  >
+                    恢复默认
+                  </button>
                 </>
               )}
               {tab === 'settings' && (

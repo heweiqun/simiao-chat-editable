@@ -1,6 +1,10 @@
 import { EmojiText } from './EmojiText';
 import { forwardRef, type CSSProperties } from 'react';
-import { getBubbleColors, formatMessageTime } from './model';
+import {
+  getBubbleColors,
+  getBubbleTypography,
+  formatMessageTime,
+} from './model';
 import type { Draft, Role } from './model';
 const iconAssets = import.meta.glob<string>('../assets/icon/*.png', {
   eager: true,
@@ -53,6 +57,8 @@ const ChatPreview = forwardRef<
     </button>
   );
   const colors = getBubbleColors(s);
+  const { bubbleFontSize, bubbleVerticalPadding, bubbleTextLineSpacing } =
+    getBubbleTypography(s);
   const ink = s.theme === 'dark' ? 'light' : 'dark';
   const battery = Math.max(0, Math.min(100, s.battery));
   return (
@@ -70,6 +76,11 @@ const ChatPreview = forwardRef<
           backgroundPosition: 'center',
           '--chat-bubble': colors.other,
           '--chat-mine': colors.self,
+          '--bubble-font-size': `${bubbleFontSize}px`,
+          '--bubble-vertical-padding': `${bubbleVerticalPadding}px`,
+          '--bubble-text-line-spacing': bubbleTextLineSpacing,
+          '--time-font-size':
+            s.bubbleFontSize === undefined ? undefined : `${bubbleFontSize}px`,
         } as CSSProperties
       }
     >
@@ -146,7 +157,7 @@ const ChatPreview = forwardRef<
               <div className="message-body">
                 {deleteButton(m.id)}
                 <div
-                  className={`bubble ${m.type === 'image' ? 'image-bubble' : m.type === 'voice' ? 'voice-bubble' : m.type === 'transfer' || m.type === 'redpacket' ? `financial-bubble ${m.received ? 'received' : ''}` : ''}`}
+                  className={`bubble ${m.type === 'text' ? 'text-bubble' : m.type === 'image' ? 'image-bubble' : m.type === 'voice' ? 'voice-bubble' : `financial-bubble ${m.received ? 'received' : ''}`}`}
                 >
                   {m.type === 'transfer' || m.type === 'redpacket' ? (
                     <div className="financial-card">

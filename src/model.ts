@@ -29,6 +29,9 @@ export interface Settings {
   bubbleColors?: Partial<
     Record<'light' | 'dark', { other: string; self: string }>
   >;
+  bubbleFontSize?: number;
+  bubbleVerticalPadding?: number;
+  bubbleTextLineSpacing?: number;
   phoneModel?: string;
   backgroundImage?: string;
   title: string;
@@ -39,6 +42,38 @@ export interface Settings {
   online: boolean;
   width: number;
   height: number;
+}
+export const bubbleTypography = {
+  bubbleFontSize: { label: '字体大小', min: 10, max: 32, step: 1, default: 16 },
+  bubbleVerticalPadding: {
+    label: '上下内边距',
+    min: 0,
+    max: 24,
+    step: 1,
+    default: 7,
+  },
+  bubbleTextLineSpacing: {
+    label: '行间距',
+    min: 1.25,
+    max: 2.5,
+    step: 0.05,
+    default: 1.55,
+  },
+} as const;
+
+export function getBubbleTypography(settings: Settings) {
+  const read = (key: keyof typeof bubbleTypography) => {
+    const { min, max, default: fallback } = bubbleTypography[key];
+    const value = settings[key];
+    return typeof value === 'number' && value >= min && value <= max
+      ? value
+      : fallback;
+  };
+  return {
+    bubbleFontSize: read('bubbleFontSize'),
+    bubbleVerticalPadding: read('bubbleVerticalPadding'),
+    bubbleTextLineSpacing: read('bubbleTextLineSpacing'),
+  };
 }
 export function getBubbleColors(settings: Settings) {
   const defaults =

@@ -549,7 +549,7 @@ h2 {
 }
 .time-notice {
   text-align: center;
-  font-size: 10px;
+  font-size: var(--time-font-size, 10px);
   color: #a2a5ac;
   margin: 0 0 26px;
 }
@@ -591,6 +591,12 @@ h2 {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   min-height: 40px;
+}
+.text-bubble {
+  font-size: var(--bubble-font-size);
+  padding-block: var(--bubble-vertical-padding);
+  line-height: var(--bubble-text-line-spacing);
+  min-height: 0;
 }
 .mine {
   flex-direction: row-reverse;
@@ -1268,8 +1274,10 @@ footer {
   min-height: 64px;
 }
 .financial-main > img {
-  width: 40px;
+  display: block;
+  width: auto;
   height: 40px;
+  max-width: 40px;
   object-fit: contain;
   flex-shrink: 0;
 }
