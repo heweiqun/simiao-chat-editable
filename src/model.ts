@@ -57,7 +57,7 @@ export const bubbleTypography = {
     min: 1.25,
     max: 2.5,
     step: 0.05,
-    default: 1.55,
+    default: 1.35,
   },
 } as const;
 
