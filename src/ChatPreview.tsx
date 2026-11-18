@@ -174,7 +174,11 @@ const ChatPreview = forwardRef<
                           {m.type === 'transfer' ? (
                             <>
                               <strong>¥{m.amount || '0.00'}</strong>
-                              <small>{m.received ? '已收款' : m.content}</small>
+                              <small>
+                                {m.received
+                                  ? m.receivedText?.trim() || '已收款'
+                                  : m.content}
+                              </small>
                             </>
                           ) : (
                             <>

@@ -11,6 +11,7 @@ export interface Message {
   type: 'text' | 'image' | 'voice' | 'time' | 'transfer' | 'redpacket';
   amount?: string;
   received?: boolean;
+  receivedText?: string;
   footer?: string;
   content: string;
 }

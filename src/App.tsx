@@ -71,9 +71,21 @@ export default function App() {
   const [transferFooter, setTransferFooter] = useState('微信转账');
   const [redpacketFooter, setRedpacketFooter] = useState('微信红包');
   const [received, setReceived] = useState(false);
+  const [receivedText, setReceivedText] = useState('已收款');
   const [duration, setDuration] = useState('2');
   const [messageTime, setMessageTime] = useState(currentMessageTime);
   const [editing, setEditing] = useState<string | null>(null);
+  const [insertAfter, setInsertAfter] = useState('');
+  const editorHeading = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (
+      insertAfter &&
+      insertAfter !== 'start' &&
+      !draft.messages.some((m) => m.id === insertAfter)
+    ) {
+      setInsertAfter('');
+    }
+  }, [draft.messages, insertAfter]);
   const [notice, setNotice] = useState('');
   const [saveError, setSaveError] = useState('');
   const [exporting, setExporting] = useState(false);
@@ -158,16 +170,31 @@ export default function App() {
         ? {
             amount: Number(amount).toFixed(2),
             received,
+            ...(type === 'transfer'
+              ? { receivedText: receivedText.trim() || '已收款' }
+              : {}),
             footer: type === 'transfer' ? transferFooter : redpacketFooter,
           }
         : {}),
     };
-    setDraft((d) => ({
-      ...d,
-      messages: editing
-        ? d.messages.map((m) => (m.id === editing ? message : m))
-        : [...d.messages, message],
-    }));
+    setDraft((d) => {
+      if (editing)
+        return {
+          ...d,
+          messages: d.messages.map((m) => (m.id === editing ? message : m)),
+        };
+      const messages = [...d.messages];
+      const anchor = messages.findIndex((m) => m.id === insertAfter);
+      const index =
+        insertAfter === 'start'
+          ? 0
+          : anchor >= 0
+            ? anchor + 1
+            : messages.length;
+      messages.splice(index, 0, message);
+      return { ...d, messages };
+    });
+    if (!editing && insertAfter) setInsertAfter(message.id);
     cancelEdit();
   };
   const move = (index: number, delta: number) =>
@@ -432,10 +459,32 @@ export default function App() {
               )}
               {tab === 'messages' && (
                 <>
-                  <div className="section-title">
+                  <div className="section-title" ref={editorHeading}>
                     <h2>{editing ? '编辑消息' : '添加消息'}</h2>
                     <span className="subtle">{draft.roles.length} 位角色</span>
                   </div>
+                  {!editing && (
+                    <label className="field">
+                      插入位置
+                      <select
+                        value={insertAfter}
+                        onChange={(e) => setInsertAfter(e.target.value)}
+                      >
+                        <option value="">对话末尾（默认）</option>
+                        <option value="start">对话开头</option>
+                        {draft.messages.map((m, index) => (
+                          <option key={m.id} value={m.id}>
+                            第 {index + 1} 条之后 ·{' '}
+                            {m.type === 'image'
+                              ? '图片消息'
+                              : m.type === 'voice'
+                                ? `语音 ${m.content}秒`
+                                : m.content.slice(0, 24)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
                   <label className="field">
                     发送角色
                     <select
@@ -537,6 +586,33 @@ export default function App() {
                         />
                         已接收
                       </label>
+                      {type === 'transfer' && received && (
+                        <div className="field">
+                          <label htmlFor="transfer-received-text">
+                            接收状态文字
+                          </label>
+                          <div className="received-text-options">
+                            {['已收款', '已被接收'].map((text) => (
+                              <button
+                                type="button"
+                                className="secondary"
+                                key={text}
+                                aria-pressed={receivedText === text}
+                                onClick={() => setReceivedText(text)}
+                              >
+                                {text}
+                              </button>
+                            ))}
+                          </div>
+                          <input
+                            id="transfer-received-text"
+                            value={receivedText}
+                            maxLength={40}
+                            placeholder="自定义接收状态文字"
+                            onChange={(e) => setReceivedText(e.target.value)}
+                          />
+                        </div>
+                      )}
                     </>
                   ) : type === 'voice' ? (
                     <label className="field">
@@ -679,6 +755,20 @@ export default function App() {
                         </div>
                         <div className="message-actions">
                           <button
+                            aria-label="在此消息后插入"
+                            title="在此消息后插入"
+                            onClick={() => {
+                              cancelEdit();
+                              setInsertAfter(m.id);
+                              editorHeading.current?.scrollIntoView({
+                                block: 'start',
+                                behavior: 'smooth',
+                              });
+                            }}
+                          >
+                            <Plus size={14} />
+                          </button>
+                          <button
                             aria-label="上移消息"
                             disabled={index === 0}
                             onClick={() => move(index, -1)}
@@ -705,6 +795,7 @@ export default function App() {
                                 setAmount(m.amount || '88.88');
                                 setRemark(m.content);
                                 setReceived(m.received === true);
+                                setReceivedText(m.receivedText ?? '已收款');
                                 if (m.type === 'transfer')
                                   setTransferFooter(m.footer ?? '微信转账');
                                 else setRedpacketFooter(m.footer ?? '微信红包');

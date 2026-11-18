@@ -1330,3 +1330,13 @@ footer {
   justify-content: center;
   text-decoration: none;
 }
+
+.received-text-options {
+  display: flex;
+  gap: 8px;
+}
+.received-text-options button[aria-pressed='true'] {
+  color: #258766;
+  border-color: #258766;
+  background: #e4f4eb;
+}
