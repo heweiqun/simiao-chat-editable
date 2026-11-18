@@ -755,8 +755,8 @@ export default function App() {
                         </div>
                         <div className="message-actions">
                           <button
-                            aria-label="在此消息后插入"
-                            title="在此消息后插入"
+                            className="message-list-insert"
+                            aria-label="插入一条信息"
                             onClick={() => {
                               cancelEdit();
                               setInsertAfter(m.id);
@@ -768,6 +768,7 @@ export default function App() {
                           >
                             <Plus size={14} />
                           </button>
+
                           <button
                             aria-label="上移消息"
                             disabled={index === 0}
@@ -1240,6 +1241,18 @@ export default function App() {
                 <ChatPreview
                   draft={draft}
                   ref={preview}
+                  onInsert={(id) => {
+                    cancelEdit();
+                    setInsertAfter(id);
+                    setTab('messages');
+                    requestAnimationFrame(() => {
+                      editorHeading.current?.scrollIntoView({
+                        block: 'start',
+                        behavior: 'smooth',
+                      });
+                      textInput.current?.focus({ preventScroll: true });
+                    });
+                  }}
                   onDelete={(id) => {
                     setDraft((d) => ({
                       ...d,

@@ -43,18 +43,30 @@ export function Avatar({ role }: { role: Role }) {
 }
 const ChatPreview = forwardRef<
   HTMLDivElement,
-  { draft: Draft; onDelete: (id: string) => void }
->(({ draft, onDelete }, ref) => {
+  {
+    draft: Draft;
+    onDelete: (id: string) => void;
+    onInsert: (id: string) => void;
+  }
+>(({ draft, onDelete, onInsert }, ref) => {
   const { settings: s, roles, messages } = draft;
   const deleteButton = (id: string) => (
-    <button
-      type="button"
-      className="preview-delete"
-      aria-label="删除此消息"
-      onClick={() => onDelete(id)}
-    >
-      删除
-    </button>
+    <div className="preview-delete preview-message-actions">
+      <button
+        type="button"
+        className="preview-insert"
+        onClick={() => onInsert(id)}
+      >
+        插入一条信息
+      </button>
+      <button
+        type="button"
+        aria-label="删除此消息"
+        onClick={() => onDelete(id)}
+      >
+        删除
+      </button>
+    </div>
   );
   const colors = getBubbleColors(s);
   const { bubbleFontSize, bubbleVerticalPadding, bubbleTextLineSpacing } =

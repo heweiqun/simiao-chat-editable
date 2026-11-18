@@ -1340,3 +1340,40 @@ footer {
   border-color: #258766;
   background: #e4f4eb;
 }
+
+.preview-message-actions {
+  display: flex;
+  gap: 5px;
+  width: max-content;
+  left: 0;
+  right: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.mine .preview-message-actions {
+  left: auto;
+  right: 0;
+}
+.deletable-time .preview-message-actions {
+  left: 50%;
+  transform: translateX(-50%);
+}
+.preview-message-actions button {
+  background: #fff;
+  border: 1px solid #f0c5c5;
+  border-radius: 5px;
+  color: #bc4141;
+  font-size: 11px;
+  line-height: 22px;
+  padding: 0 8px;
+  white-space: nowrap;
+}
+.preview-message-actions .preview-insert {
+  color: #258766;
+  border-color: #b8daca;
+}
+.deletable-time:focus-within > .preview-message-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
