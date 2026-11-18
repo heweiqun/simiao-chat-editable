@@ -68,8 +68,8 @@ export default function App() {
   const [type, setType] = useState<Message['type']>('text');
   const [amount, setAmount] = useState('88.88');
   const [remark, setRemark] = useState('');
-  const [transferFooter, setTransferFooter] = useState('微信转账');
-  const [redpacketFooter, setRedpacketFooter] = useState('微信红包');
+  const [transferFooter, setTransferFooter] = useState('四喵转账');
+  const [redpacketFooter, setRedpacketFooter] = useState('四喵红包');
   const [received, setReceived] = useState(false);
   const [receivedText, setReceivedText] = useState('已收款');
   const [duration, setDuration] = useState('2');
@@ -798,8 +798,8 @@ export default function App() {
                                 setReceived(m.received === true);
                                 setReceivedText(m.receivedText ?? '已收款');
                                 if (m.type === 'transfer')
-                                  setTransferFooter(m.footer ?? '微信转账');
-                                else setRedpacketFooter(m.footer ?? '微信红包');
+                                  setTransferFooter(m.footer ?? '四喵转账');
+                                else setRedpacketFooter(m.footer ?? '四喵红包');
                               }
                               if (m.type === 'voice') setDuration(m.content);
                               if (m.type === 'time') setMessageTime(m.content);

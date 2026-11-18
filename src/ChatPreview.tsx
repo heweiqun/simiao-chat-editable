@@ -202,7 +202,7 @@ const ChatPreview = forwardRef<
                       </div>
                       <div className="financial-footer">
                         {m.footer ??
-                          (m.type === 'transfer' ? '微信转账' : '微信红包')}
+                          (m.type === 'transfer' ? '四喵转账' : '四喵红包')}
                       </div>
                     </div>
                   ) : m.type === 'text' ? (
